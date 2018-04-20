@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <!-- Latest compiled and minified JavaScript -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+
+    <!--<script src="http://code.jquery.com/jquery-1.9.1.min.js"></script> -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+
+    <style>
+
+      .show-none {
+        display: none;
+      }
+      label {
+        color: #333!important;
+      }
+      .m-b-30 {
+        margin-bottom: 10px;
+      }
+      #results, #nonlanded-results {
+        display: none;
+        position: absolute;
+        background-color: #f1f1f1;
+        min-width: 160px;
+        box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+        z-index: 1;
+      }
+      #results li, #nonlanded-results li {
+        color: black;
+        padding: 12px 16px;
+        text-decoration: none;
+        display: block;
+      }
+      #address-landed, #address-nonlanded{
+        width: 360px;
+      }
+
+
+    </style>
+  </head>
+  <body>
+
+
+  <select id="" name="" class="property__type" name="Fruit" onchange="java_script_:show(this.options[this.selectedIndex].value)">
+    <option selected="" value="" disabled>Please select</option>
+    <option value="Landed">Landed</option>
+    <option value="Non-landed">Non-landed</option>
+  </select>
+
+  <!--Hidden Landed-->
+  <div class="form__item show-none"  id="hiddenLanded" >
+
+    <div class="m-b-30">
+      <label class="label required float-left">Property address</label>
+
+      <!--autocomplete/r-->
+      <input id="address-landed" name="" type="text" value="">
+      <!--autocomplete/json results landed -->
+      <div id="results">
+        
+      </div>  
+      
+    </div>
+
+    <div class="m-b-30">
+      <label class="label required float-left">Sub-property type</label>
+      <input id="" name="" type="text">
+      
+    </div>
+    <div class="clearfix"></div>
+    <div class="m-b-30"> 
+      <label class="label required float-left">Built-Up (sq ft)</label> 
+      <input id="" name="" type="text">
+    </div>
+    <div class="clearfix"></div>
+    <div class="m-b-30">
+      <label class="label required float-left">Land Size (sq ft) </label>
+      <input id="" name="" type="text">
+    </div>
+  </div>
+  <!--Hidden Non-Landed-->
+  <div class="form__item show-none"  id="hiddenNonLanded" >
+    <div class="m-b-30">
+      <label class="label required float-left">Property address</label>
+
+      <!--autocomplete/l-->
+      <input id="address-nonlanded" name="" type="text">
+      <!--autocomplete/json results non landed-->
+      <div id="nonlanded-results">
+        
+      </div>  
+    </div>
+
+    <div class="m-b-30">
+      <label class="label required float-left">Block</label>
+      <input id="sub-non-landed" name="" type="text">
+    </div>
+    <div class="clearfix"></div>
+    <div class="m-b-30"> 
+      <label class="label required float-left">Level</label> 
+      <input id="" name="" type="text">
+    </div>
+    <div class="clearfix"></div>
+    <div class="m-b-30">
+      <label class="label required float-left">Built-Up (sq ft)</label>
+      <input id="" name="" type="text">
+    </div>
+  </div>
+  </body>
+</html>
+
+<script>
+  var ptype = '';
+  function show(aval) {
+    if (aval == "Landed") {
+        ptype = 'landed';
+        $('#hiddenLanded').slideToggle();
+        $('#hiddenNonLanded').slideUp();
+        $("#address-landed").val("");
+
+        
+        // Instant search landed
+        $("#address-landed").keyup(function(e){
+        var q = $("#address-landed").val();
+        $.getJSON("https://www.edgeprop.my/index.php?q=erp/autocomplete/r",
+        
+        function(data) {
+          $("#results").empty();
+          
+          $.each(data, function(i,item){
+            //item is basically the json response value; i = key, item = value
+            var item_new = item.replace(", "," ");
+            item_new = item_new.replace(", "," ");
+            var expr_main = q;//expression to search
+            var expr_upper = q.toUpperCase();
+          
+            if( q && (item_new.includes(expr_upper) || item_new.includes(expr_main))){
+                $("#results").append("<li class='list-search' style='list-style-type:none;padding:3px;margin:5px;'>" + item + "</li>");
+                $("#results").css("display", "block");
+
+                //setting css property of search lists
+                $(".list-search").mouseenter(function() {
+                      $(this).css("background", "#3b839c").css("cursor","pointer").css("color","white");
+                  }).mouseleave(function() {
+                       $(this).css("background", "#f1f1f1").css("color","black");
+                  });
+
+                //clicking list to set input
+                $(".list-search").click(function(){
+                    $("#address-landed").val($(this).text());
+                    $("#results").css("display", "none");
+                });
+                //for hiding the div when mouse is outside of the div
+                $("#results").mouseleave(function() {
+                       $(this).css("display", "none");
+                });
+
+            }
+            
+          });
+        });
+      });
+    }
+    else if (aval == "Non-landed") {
+        ptype = 'non-landed';
+        $('#hiddenNonLanded').slideToggle();
+        $('#hiddenLanded').slideUp();
+        $("#address-nonlanded").val("");
+
+
+        //instant search non landed
+        $("#address-nonlanded").keyup(function(e){
+        var q = $("#address-nonlanded").val();
+
+        $.getJSON("https://www.edgeprop.my/index.php?q=erp/autocomplete/l",
+        function(data) {
+          $("#nonlanded-results").empty();
+          
+          $.each(data, function(i,item){
+            //item is basically the json response value; i = key, item = value
+            var item_new = item.replace(", "," ");
+            item_new = item_new.replace(", "," ");
+            var expr_main = q;
+            var expr_upper = q.toUpperCase();
+          
+            if( q && (item_new.includes(expr_upper) || item_new.includes(expr_main))){
+                $("#nonlanded-results").append("<li class='list-search' style='list-style-type:none;padding:3px;margin:5px;'>" + item + "</li>");
+                $("#nonlanded-results").css("display", "block");
+
+                //setting css property of search lists
+                $(".list-search").mouseenter(function() {
+                      $(this).css("background", "#3b839c").css("cursor","pointer").css("color","white");
+
+                  }).mouseleave(function() {
+                       $(this).css("background", "#f1f1f1").css("color","black");
+                  });
+
+                //clicking list to set input
+                $(".list-search").click(function(){
+                    $("#address-nonlanded").val($(this).text());
+                    $("#nonlanded-results").css("display", "none");
+                });
+
+                //for hiding the div when mouse is outside of the div
+                $("#nonlanded-results").mouseleave(function() {
+                       $(this).css("display", "none");
+                });
+
+            }
+            
+          });
+        });
+      });
+
+    } 
+    else{
+     $('#hiddenLanded, #hiddenNonLanded').slideUp();
+    }
+  }
+  
+</script>
+
+<script>
+//scrit for select JSON should goes here
+
+</script>
+ 
